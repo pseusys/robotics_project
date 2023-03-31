@@ -24,6 +24,7 @@
 
 #define rotation_epsilon 0.01
 #define translation_epsilon 0.1
+#define interaction_epsilon 1.5
 
 class decision_node
 {
@@ -160,7 +161,7 @@ void update()
 	}
     }
     
-    if (translation_to_base > max_base_distance) current_state = rotating_to_the_base;
+    if (translation_to_base > max_base_distance || (!person_tracked && current_state != waiting_for_a_person)) current_state = rotating_to_the_base;
 
     new_localization = false;
     person_position_received = false;
@@ -296,9 +297,6 @@ void process_interacting_with_the_person()
     {
         ROS_INFO("current_state: interacting_with_the_person");
         ROS_INFO("person_position: (%f, %f)", person_position.x, person_position.y);
-        ROS_INFO("press enter to continue");
-        getchar();
-        frequency = 0;
     }
 
     // Processing of the state
@@ -309,7 +307,7 @@ void process_interacting_with_the_person()
         ROS_INFO("person_position: (%f, %f)", person_position.x, person_position.y);
     }
 
-    // what should robair do if it loses the moving person ?
+    if (translation_to_person > interaction_epsilon) current_state = rotating_to_the_base;
 
 }
 
