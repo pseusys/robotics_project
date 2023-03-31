@@ -160,8 +160,6 @@ void update()
 	        break;
 	}
     }
-    
-    if (translation_to_base > max_base_distance || (!person_tracked && current_state != waiting_for_a_person)) current_state = rotating_to_the_base;
 
     new_localization = false;
     person_position_received = false;
@@ -263,7 +261,8 @@ void process_rotating_to_the_person()
     } else frequency++;
     
     pub_rotation_to_do.publish(rotation_to_person);
-    if (frequency >= frequency_expected && rotation_to_person < rotation_epsilon) current_state = moving_to_the_person;
+    if (!person_tracked) current_state = resetting_orientation;
+    else if (frequency >= frequency_expected && rotation_to_person < rotation_epsilon) current_state = moving_to_the_person;
 }
 
 void process_moving_to_the_person()
@@ -286,7 +285,8 @@ void process_moving_to_the_person()
     } else frequency++;
 
     pub_goal_to_reach.publish(person_position);
-    if (frequency >= frequency_expected && translation_to_person < translation_epsilon) current_state = interacting_with_the_person;
+    if (translation_to_base > max_base_distance || !person_tracked) current_state = rotating_to_the_base;
+    else if (frequency >= frequency_expected && translation_to_person < translation_epsilon) current_state = interacting_with_the_person;
 
 }
 
@@ -307,7 +307,7 @@ void process_interacting_with_the_person()
         ROS_INFO("person_position: (%f, %f)", person_position.x, person_position.y);
     }
 
-    if (translation_to_person > interaction_epsilon) current_state = rotating_to_the_base;
+    if (translation_to_person > interaction_epsilon || !person_tracked) current_state = rotating_to_the_base;
 
 }
 
