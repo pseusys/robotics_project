@@ -318,9 +318,6 @@ void process_rotating_to_the_base()
     {
         ROS_INFO("current_state: rotating_to_the_base");
         ROS_INFO("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation*180/M_PI);
-        ROS_INFO("press enter to continue");
-        getchar();
-        frequency = 0;
     }
 
     // Processing of the state
@@ -330,6 +327,9 @@ void process_rotating_to_the_base()
     {
         ROS_INFO("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation*180/M_PI);
     }
+    
+    pub_rotation_to_do.publish(rotation_to_base);
+    if (rotation_to_base < rotation_epsilon) current_state = moving_to_the_base;
 
 }
 
@@ -340,9 +340,6 @@ void process_moving_to_the_base()
     {
         ROS_INFO("current_state: moving_to_the_base");
         ROS_INFO("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation*180/M_PI);
-        ROS_INFO("press enter to continue");
-        getchar();
-        frequency = 0;
     }
 
     // Processing of the state
@@ -352,6 +349,9 @@ void process_moving_to_the_base()
     {
         ROS_INFO("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation*180/M_PI);
     }
+    
+    pub_goal_to_reach.publish(base_position);
+    if (translation_to_base < translation_epsilon) current_state = resetting_orientation;
 
 }
 
