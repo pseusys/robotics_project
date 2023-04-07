@@ -449,6 +449,7 @@ public:
                     person_detected[nb_persons_detected].x = (leg_detected[loop_leg1].x - leg_detected[loop_leg2].x) / 2 + leg_detected[loop_leg2].x;
                     person_detected[nb_persons_detected].y = (leg_detected[loop_leg1].y - leg_detected[loop_leg2].y) / 2 + leg_detected[loop_leg2].y;
                     person_dynamic[nb_persons_detected] = leg_dynamic[loop_leg1] && leg_dynamic[loop_leg2];
+                    person_detected[nb_persons_detected].z = person_dynamic[nb_persons_detected] ? 1 : 0;
 
                     if (person_dynamic[nb_persons_detected])
                     {
