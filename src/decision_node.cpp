@@ -64,7 +64,6 @@ private:
     float base_orientation;
     geometry_msgs::Point origin_position;
     bool state_has_changed;
-    bool person_is_moving = false;
 
 public:
     decision_node()
@@ -88,7 +87,6 @@ public:
         current_state = waiting_for_a_person;
         previous_state = -1;
 
-        person_is_moving = false;
         state_has_changed = false;
 
         // TO DEFINE according to the position of the base/initial position in the map
@@ -227,7 +225,7 @@ void process_observing_the_person()
     // Processing of the state
     // Robair only observes and tracks the moving person
     // if the moving person does not move during a while (use frequency), we switch to the state "rotating_to_the_person"
-    if (new_person_position)
+    if (person_position.z)
     {
         ROS_WARN("person_position: (%f, %f), %d", person_position.x, person_position.y, frequency);
         frequency = 0;
@@ -252,7 +250,7 @@ void process_rotating_to_the_person()
     // Processing of the state
     // Robair rotates to be face to the moving person
     // if robair is face to the moving person and the moving person does not move during a while (use frequency), we switch to the state "moving_to_the_person"
-    if (new_person_position)
+    if (person_position.z)
     {
         ROS_WARN("person_position: (%f, %f)", person_position.x, person_position.y);
         frequency = 0;
@@ -282,7 +280,7 @@ void process_moving_to_the_person()
     // Processing of the state
     // Robair moves to be close to the moving person
     // if robair is close to the moving person and the moving person does not move during a while (use frequency), we switch to the state "interacting_with_the_person"
-    if (new_person_position)
+    if (person_position.z)
     {
         ROS_WARN("person_position: (%f, %f)", person_position.x, person_position.y);
         frequency = 0;
