@@ -583,6 +583,7 @@ public:
                 ROS_WARN("moving person tracked has been lost");
                 moving_person_tracked.x = 0;
                 moving_person_tracked.y = 0;
+                moving_person_tracked.z = 0;
                 pub_datmo.publish(moving_person_tracked);
             }
         }

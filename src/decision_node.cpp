@@ -233,7 +233,7 @@ void process_observing_the_person()
     else
         frequency++;
 
-    ROS_WARN("rotating_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
+    ROS_WARN("observing_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
     if (frequency >= frequency_expected)
         current_state = rotating_to_the_person;
 }
@@ -259,13 +259,13 @@ void process_rotating_to_the_person()
     else
         frequency++;
 
-    ROS_WARN("rotating_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
+    ROS_WARN("rotating_to_the_person: (%f, %f), %f, %d: %d", person_position.x, person_position.y, rotation_to_person, frequency, (int) person_position.z);
     std_msgs::Float32 rotation_to_person_msg;
     rotation_to_person_msg.data = rotation_to_person;
     pub_rotation_to_do.publish(rotation_to_person_msg);
     if (!person_tracked)
         current_state = resetting_orientation;
-    else if (frequency >= frequency_expected && rotation_to_person < rotation_epsilon)
+    else if (frequency >= frequency_expected && abs(rotation_to_person) < rotation_epsilon)
         current_state = moving_to_the_person;
 }
 
@@ -290,7 +290,7 @@ void process_moving_to_the_person()
     else
         frequency++;
 
-    ROS_WARN("rotating_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
+    ROS_WARN("moving_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
     pub_goal_to_reach.publish(person_position);
     if (translation_to_base > max_base_distance || !person_tracked)
         current_state = rotating_to_the_base;
@@ -404,6 +404,7 @@ void person_positionCallback(const geometry_msgs::Point::ConstPtr &g)
     new_person_position = true;
     person_position.x = g->x;
     person_position.y = g->y;
+    person_position.z = g->z;
 }
 
 void robot_movingCallback(const std_msgs::Bool::ConstPtr &state)
