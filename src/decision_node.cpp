@@ -23,6 +23,7 @@
 #define max_base_distance 6
 
 #define rotation_epsilon 0.01
+#define approach_epsilon 0.3
 #define translation_epsilon 0.1
 #define interaction_epsilon 1.5
 
@@ -225,14 +226,14 @@ void process_observing_the_person()
     // Processing of the state
     // Robair only observes and tracks the moving person
     // if the moving person does not move during a while (use frequency), we switch to the state "rotating_to_the_person"
-    if (person_position.z)
+    if (new_person_position && person_position.z)
     {
-        ROS_WARN("person_position: (%f, %f), %d", person_position.x, person_position.y, frequency);
         frequency = 0;
     }
     else
         frequency++;
 
+    ROS_WARN("rotating_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
     if (frequency >= frequency_expected)
         current_state = rotating_to_the_person;
 }
@@ -258,6 +259,7 @@ void process_rotating_to_the_person()
     else
         frequency++;
 
+    ROS_WARN("rotating_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
     std_msgs::Float32 rotation_to_person_msg;
     rotation_to_person_msg.data = rotation_to_person;
     pub_rotation_to_do.publish(rotation_to_person_msg);
@@ -288,10 +290,11 @@ void process_moving_to_the_person()
     else
         frequency++;
 
+    ROS_WARN("rotating_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
     pub_goal_to_reach.publish(person_position);
     if (translation_to_base > max_base_distance || !person_tracked)
         current_state = rotating_to_the_base;
-    else if (frequency >= frequency_expected && translation_to_person < translation_epsilon)
+    else if (frequency >= frequency_expected && translation_to_person < approach_epsilon)
         current_state = interacting_with_the_person;
 }
 
