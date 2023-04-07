@@ -64,6 +64,8 @@ private:
     float base_orientation;
     geometry_msgs::Point origin_position;
     bool state_has_changed;
+    bool person_position_received = false;
+    bool person_is_moving = false;
 
 public:
     decision_node()
@@ -156,7 +158,6 @@ public:
                 process_resetting_orientation();
                 break;
             }
-        }
 
         if (translation_to_base > max_base_distance)
             current_state = rotating_to_the_base;
@@ -200,7 +201,7 @@ update_variables()
         // translation_to_base: the translation that robair has to do to reach its base
         translation_to_base = distancePoints(current_position, base_position);
         // rotation_to_base: the rotation that robair has to do to reach its base
-        rotation_to_base = current_rotation - base_rotation;
+        rotation_to_base = current_orientation - base_orientation;
     }
 }
 
@@ -262,7 +263,9 @@ void process_rotating_to_the_person()
     else
         frequency++;
 
-    pub_rotation_to_do.publish(rotation_to_person);
+    std_msgs::Float32 rotation_to_person_msg;
+    rotation_to_person_msg.data = rotation_to_person;
+    pub_rotation_to_do.publish(rotation_to_person_msg);
     if (!person_tracked)
         current_state = resetting_orientation;
     else if (frequency >= frequency_expected && rotation_to_person < rotation_epsilon)
@@ -335,7 +338,9 @@ void process_rotating_to_the_base()
         ROS_INFO("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation * 180 / M_PI);
     }
 
-    pub_rotation_to_do.publish(rotation_to_base);
+    std_msgs::Float32 rotation_to_base_msg;
+    rotation_to_base_msg.data = rotation_to_person;
+    pub_rotation_to_do.publish(rotation_to_base_msg);
     if (rotation_to_base < rotation_epsilon)
         current_state = moving_to_the_base;
 }
@@ -383,7 +388,10 @@ void process_resetting_orientation()
     else
         frequency++;
 
-    pub_rotation_to_do.publish(rotation_to_base);
+    // TODO: remember rotation!
+    std_msgs::Float32 rotation_to_base_msg;
+    rotation_to_base_msg.data = rotation_to_base;
+    pub_rotation_to_do.publish(rotation_to_base_msg);
     if (frequency >= frequency_expected && rotation_to_base < rotation_epsilon)
         current_state = waiting_for_a_person;
 }
