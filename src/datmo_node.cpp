@@ -449,7 +449,6 @@ public:
                     person_detected[nb_persons_detected].x = (leg_detected[loop_leg1].x - leg_detected[loop_leg2].x) / 2 + leg_detected[loop_leg2].x;
                     person_detected[nb_persons_detected].y = (leg_detected[loop_leg1].y - leg_detected[loop_leg2].y) / 2 + leg_detected[loop_leg2].y;
                     person_dynamic[nb_persons_detected] = leg_dynamic[loop_leg1] && leg_dynamic[loop_leg2];
-                    person_detected[nb_persons_detected].z = person_dynamic[nb_persons_detected] ? 1 : 0;
 
                     if (person_dynamic[nb_persons_detected])
                     {
@@ -463,7 +462,7 @@ public:
                         colors[nb_pts].r = 0;
                         colors[nb_pts].g = 1;
                         colors[nb_pts].b = 0;
-                        colors[nb_pts].a = 0.2;
+                        colors[nb_pts].a = 1;
 
                         nb_pts++;
                     }
@@ -479,7 +478,7 @@ public:
                         colors[nb_pts].r = 1;
                         colors[nb_pts].g = 0;
                         colors[nb_pts].b = 0;
-                        colors[nb_pts].a = 0.2;
+                        colors[nb_pts].a = 1;
 
                         nb_pts++;
                     }
@@ -526,7 +525,7 @@ public:
 
         bool associated = false;
         float distance_min = uncertainty;
-        int index_min;
+        int index_min, closest_idx;
 
         // we search for the closest detection to the tracking person
         for (int loop_detection = 0; loop_detection < nb_persons_detected; loop_detection++)
@@ -538,7 +537,7 @@ public:
                 // we store the info about the closest detection
                 distance_min = current_dist;
                 associated = true;
-                moving_person_tracked = person_detected[loop_detection];
+                closest_idx = loop_detection;
                 ROS_INFO("track associated with %i", loop_detection);
             }
         }
@@ -547,13 +546,15 @@ public:
 
         if (associated)
         {
+            moving_person_tracked = person_detected[closest_idx];
+        
             // if the moving_person_tracked has been associated how we update moving_person_tracked, frequency and uncertainty
             pub_datmo.publish(moving_person_tracked);
             if (frequency <= frequency_max)
                 frequency++;
             uncertainty = uncertainty_min;
 
-            ROS_INFO("moving_person_tracked: (%f, %f), %i, %f", moving_person_tracked.x,
+            ROS_WARN("moving person tracked: (%f, %f), %i, %f", moving_person_tracked.x,
                      moving_person_tracked.y,
                      frequency,
                      uncertainty);
@@ -570,7 +571,7 @@ public:
         else
         {
             // if the moving_person_tracked has not been associated how we update moving_person_tracked, frequency and uncertainty
-            ROS_INFO("moving_person_tracked: (%f, %f), %i, %f", moving_person_tracked.x,
+            ROS_WARN("moving person not tracked: (%f, %f), %i, %f", moving_person_tracked.x,
                      moving_person_tracked.y,
                      frequency,
                      uncertainty);
@@ -583,7 +584,6 @@ public:
                 ROS_WARN("moving person tracked has been lost");
                 moving_person_tracked.x = 0;
                 moving_person_tracked.y = 0;
-                moving_person_tracked.z = 0;
                 pub_datmo.publish(moving_person_tracked);
             }
         }

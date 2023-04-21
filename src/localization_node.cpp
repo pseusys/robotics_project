@@ -87,8 +87,8 @@ localization_node() {
     sub_position = n.subscribe("initialpose", 1, &localization_node::positionCallback, this);
 
     // get map via RPC
-    nav_msgs::GetMap::Request  req;
-    ROS_INFO("Requesting the map...");
+    nav_msgs::GetMap::Request req;
+    ROS_WARN("Requesting the map...");
     while(!ros::service::call("static_map", req, resp)) {
       // ROS_WARN("Request for map failed; trying again...");
       ros::Duration d(0.5);
@@ -111,6 +111,7 @@ localization_node() {
     ROS_INFO("map loaded");
     ROS_INFO("Map: (%f, %f) -> (%f, %f) with size: %f",min.x, min.y, max.x, max.y, cell_size);
     ROS_INFO("wait for initial pose");
+    // TODO: wait for initial position
 
     //INFINTE LOOP TO COLLECT LASER DATA AND PROCESS THEM
     ros::Rate r(10);// this node will work at 10hz
@@ -161,8 +162,6 @@ void initialize_localization() {
     int score_max = sensor_model(initial_position.x, initial_position.y, initial_orientation);
     ROS_INFO("initial_position(%f, %f, %f): score = %i", initial_position.x, initial_position.y, initial_orientation*180/M_PI, score_max);
     populateMarkerTopic();
-    ROS_INFO("press enter to continue");
-    getchar();
 
     odom_last = odom_current;
     odom_last_orientation = odom_current_orientation;
@@ -192,8 +191,6 @@ void initialize_localization() {
 		    	estimated_position.x = loop_x;
 		    	estimated_position.y = loop_y;
 		    	estimated_orientation = loop_o;
-		    	ROS_INFO("press enter to continue");
-		        getchar();
 		    }
 		}
             }
@@ -235,8 +232,6 @@ void estimate_position() {
     int score_max = sensor_model(predicted_position.x, predicted_position.y, predicted_orientation);
     ROS_INFO("predicted position(%f, %f, %f): score = %i", predicted_position.x, predicted_position.y, predicted_orientation*180/M_PI, score_max);
     populateMarkerTopic();
-    ROS_INFO("press enter to continue");
-    getchar();
 
     //estimation of the positions closed to the predicted_position
     float min_x, max_x, min_y, max_y, min_orientation, max_orientation;
@@ -264,8 +259,6 @@ void estimate_position() {
 		    	estimated_position.x = loop_x;
 		    	estimated_position.y = loop_y;
 		    	estimated_orientation = loop_o;
-		    	ROS_INFO("press enter to continue");
-		    	getchar();
 		    }
 		}
             }

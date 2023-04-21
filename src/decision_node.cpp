@@ -74,7 +74,7 @@ public:
         sub_person_position = n.subscribe("person_position", 1, &decision_node::person_positionCallback, this);
 
         // communication with rotation_node
-        pub_rotation_to_do = n.advertise<std_msgs::Float32>("rotation_to_do", 0);
+        pub_rotation_to_do = n.advertise<geometry_msgs::Point>("goal_to_rotate", 0);
 
         // communication with action_node
         pub_goal_to_reach = n.advertise<geometry_msgs::Point>("goal_to_reach", 1); // Preparing a topic to publish the position of the person
@@ -260,9 +260,7 @@ void process_rotating_to_the_person()
         frequency++;
 
     ROS_WARN("rotating_to_the_person: (%f, %f), %f, %d: %d", person_position.x, person_position.y, rotation_to_person, frequency, (int) person_position.z);
-    std_msgs::Float32 rotation_to_person_msg;
-    rotation_to_person_msg.data = rotation_to_person;
-    pub_rotation_to_do.publish(rotation_to_person_msg);
+    pub_rotation_to_do.publish(person_position);
     if (!person_tracked)
         current_state = resetting_orientation;
     else if (frequency >= frequency_expected && abs(rotation_to_person) < rotation_epsilon)
@@ -405,6 +403,7 @@ void person_positionCallback(const geometry_msgs::Point::ConstPtr &g)
     person_position.x = g->x;
     person_position.y = g->y;
     person_position.z = g->z;
+    ROS_WARN("Person position: (%lf, %lf, %lf)", g->x, g->y, g->z);
 }
 
 void robot_movingCallback(const std_msgs::Bool::ConstPtr &state)

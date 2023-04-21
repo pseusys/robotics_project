@@ -58,7 +58,7 @@ rotation_node() {
     sub_odometry = n.subscribe("odom", 1, &rotation_node::odomCallback, this);
 
     // communication with datmo
-    sub_goal_to_reach = n.subscribe("goal_to_reach", 1, &rotation_node::goal_to_reachCallback, this);
+    sub_goal_to_reach = n.subscribe("goal_to_rotate", 1, &rotation_node::goal_to_reachCallback, this);
 
     new_goal_to_reach = false;
     init_odom = false;   
