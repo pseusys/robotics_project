@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(welcome_robot)
+project(robotics_project)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -108,26 +108,26 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(action_welcome_robot_node src/action_node.cpp)
-add_executable(datmo_welcome_robot_node src/datmo_node.cpp)
-add_executable(decision_welcome_robot_node src/decision_node.cpp)
-add_executable(localization_welcome_robot_node src/localization_node.cpp)
-add_executable(obstacle_detection_welcome_robot_node src/obstacle_detection_node.cpp)
-add_executable(robot_moving_welcome_robot_node src/robot_moving_node.cpp)
-add_executable(rotation_welcome_robot_node src/rotation_node.cpp)
+add_executable(action_robotics_project_node src/action_node.cpp)
+add_executable(datmo_robotics_project_node src/datmo_node.cpp)
+add_executable(decision_robotics_project_node src/decision_node.cpp)
+add_executable(localization_robotics_project_node src/localization_node.cpp)
+add_executable(obstacle_detection_robotics_project_node src/obstacle_detection_node.cpp)
+add_executable(robot_moving_robotics_project_node src/robot_moving_node.cpp)
+add_executable(rotation_robotics_project_node src/rotation_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(datmo_node datmo_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(action_welcome_robot_node ${catkin_LIBRARIES})
-target_link_libraries(datmo_welcome_robot_node ${catkin_LIBRARIES})
-target_link_libraries(decision_welcome_robot_node ${catkin_LIBRARIES})
-target_link_libraries(localization_welcome_robot_node ${catkin_LIBRARIES})
-target_link_libraries(obstacle_detection_welcome_robot_node ${catkin_LIBRARIES})
-target_link_libraries(robot_moving_welcome_robot_node ${catkin_LIBRARIES})
-target_link_libraries(rotation_welcome_robot_node ${catkin_LIBRARIES})
+target_link_libraries(action_robotics_project_node ${catkin_LIBRARIES})
+target_link_libraries(datmo_robotics_project_node ${catkin_LIBRARIES})
+target_link_libraries(decision_robotics_project_node ${catkin_LIBRARIES})
+target_link_libraries(localization_robotics_project_node ${catkin_LIBRARIES})
+target_link_libraries(obstacle_detection_robotics_project_node ${catkin_LIBRARIES})
+target_link_libraries(robot_moving_robotics_project_node ${catkin_LIBRARIES})
+target_link_libraries(rotation_robotics_project_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##

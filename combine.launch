@@ -1,10 +1,10 @@
 <launch>
-	<node name="complete_action" pkg="welcome_robot" type="action_welcome_robot_node" />
-	<node name="datmo_detection" pkg="welcome_robot" type="datmo_welcome_robot_node" />
-	<node name="complete_decision" pkg="welcome_robot" type="decision_welcome_robot_node" />
-	<node name="localization_detection" pkg="welcome_robot" type="localization_welcome_robot_node" />
-	<node name="obstacle_detection" pkg="welcome_robot" type="obstacle_detection_welcome_robot_node" />
-	<node name="movement_detection" pkg="welcome_robot" type="robot_moving_welcome_robot_node" />
-	<node name="rotation_action" pkg="welcome_robot" type="rotation_welcome_robot_node" />
+	<node name="complete_action" pkg="robotics_project" type="action_welcome_robot_node" />
+	<node name="datmo_detection" pkg="robotics_project" type="datmo_welcome_robot_node" />
+	<node name="complete_decision" pkg="robotics_project" type="decision_welcome_robot_node" />
+	<node name="localization_detection" pkg="robotics_project" type="localization_welcome_robot_node" />
+	<node name="obstacle_detection" pkg="robotics_project" type="obstacle_detection_welcome_robot_node" />
+	<node name="movement_detection" pkg="robotics_project" type="robot_moving_welcome_robot_node" />
+	<node name="rotation_action" pkg="robotics_project" type="rotation_welcome_robot_node" />
 </launch>
 
