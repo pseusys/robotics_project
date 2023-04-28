@@ -93,7 +93,7 @@ localization_node() {
     nav_msgs::GetMap::Request req;
     ROS_WARN("Requesting the map...");
     while(!ros::service::call("static_map", req, resp)) {
-      // ROS_WARN("Request for map failed; trying again...");
+      ROS_WARN("Request for map failed; trying again...");
       ros::Duration d(0.5);
       d.sleep();
     }
@@ -115,7 +115,11 @@ localization_node() {
     ROS_INFO("Map: (%f, %f) -> (%f, %f) with size: %f",min.x, min.y, max.x, max.y, cell_size);
     ROS_INFO("wait for initial pose");
 
-    getchar();
+    while(!init_position) {
+      ROS_WARN("Request for initial position failed; trying again...");
+      ros::Duration d(0.5);
+      d.sleep();
+    }
 
     //INFINTE LOOP TO COLLECT LASER DATA AND PROCESS THEM
     ros::Rate r(10);// this node will work at 10hz
