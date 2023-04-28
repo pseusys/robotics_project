@@ -554,7 +554,7 @@ public:
                 frequency++;
             uncertainty = uncertainty_min;
 
-            ROS_WARN("moving person tracked: (%f, %f), %i, %f", moving_person_tracked.x,
+            ROS_INFO("moving person tracked: (%f, %f), %i, %f", moving_person_tracked.x,
                      moving_person_tracked.y,
                      frequency,
                      uncertainty);
@@ -571,7 +571,7 @@ public:
         else
         {
             // if the moving_person_tracked has not been associated how we update moving_person_tracked, frequency and uncertainty
-            ROS_WARN("moving person not tracked: (%f, %f), %i, %f", moving_person_tracked.x,
+            ROS_INFO("moving person not tracked: (%f, %f), %i, %f", moving_person_tracked.x,
                      moving_person_tracked.y,
                      frequency,
                      uncertainty);
@@ -581,7 +581,7 @@ public:
             tracking_mode = frequency != 0; // when do we switch tracking_mode to false ???
             if (!tracking_mode)
             {
-                ROS_WARN("moving person tracked has been lost");
+                ROS_INFO("moving person tracked has been lost");
                 moving_person_tracked.x = 0;
                 moving_person_tracked.y = 0;
                 pub_datmo.publish(moving_person_tracked);

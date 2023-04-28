@@ -9,8 +9,8 @@
 #include <tf/transform_datatypes.h>
 #include "geometry_msgs/Point.h"
 
-#define rotation_error_threshold M_PI/18//radians = 10 degres
-#define rotation_speed_max M_PI/6// radians = 30 degres/s
+#define rotation_error_threshold M_PI/18 //radians = 10 degres
+#define rotation_speed_max M_PI/6 // radians = 30 degres/s
 
 #define kpr 0.5
 #define kir 0

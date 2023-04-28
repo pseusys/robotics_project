@@ -22,12 +22,12 @@
 #define frequency_expected 25
 #define max_base_distance 6
 
-#define rotation_epsilon 0.01
+#define rotation_epsilon M_PI/18
 #define approach_epsilon 0.3
 #define translation_epsilon 0.1
 #define interaction_epsilon 1.5
 
-#define person_moving_epsilon 0.01
+#define person_moving_epsilon 0.025
 
 class decision_node
 {
@@ -174,7 +174,6 @@ public:
 void
 update_variables()
 {
-
     if (new_person_position)
     {
         translation_to_person = distancePoints(origin_position, person_position);
@@ -240,7 +239,7 @@ void process_observing_the_person()
     else
         frequency++;
 
-    ROS_WARN("observing_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
+    ROS_WARN("observing_the_person: (%f, %f), %d", person_position.x, person_position.y, frequency);
     if (frequency >= frequency_expected)
         current_state = rotating_to_the_person;
 }
@@ -266,7 +265,7 @@ void process_rotating_to_the_person()
     else
         frequency++;
 
-    ROS_WARN("rotating_to_the_person: (%f, %f), %f, %d: %d", person_position.x, person_position.y, rotation_to_person, frequency, (int) person_position.z);
+    ROS_WARN("rotating_to_the_person: (%f, %f), %f, %d", person_position.x, person_position.y, rotation_to_person, frequency);
     pub_rotation_to_do.publish(person_position);
     if (!person_tracked)
         current_state = resetting_orientation;
@@ -295,7 +294,7 @@ void process_moving_to_the_person()
     else
         frequency++;
 
-    ROS_WARN("moving_to_the_person: (%f, %f), %d: %d", person_position.x, person_position.y, frequency, (int) person_position.z);
+    ROS_WARN("moving_to_the_person: (%f, %f), %d", person_position.x, person_position.y, frequency);
     pub_goal_to_reach.publish(person_position);
     if (translation_to_base > max_base_distance || !person_tracked)
         current_state = rotating_to_the_base;
