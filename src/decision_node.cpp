@@ -27,6 +27,8 @@
 #define translation_epsilon 0.1
 #define interaction_epsilon 1.5
 
+#define person_moving_epsilon 0.01
+
 class decision_node
 {
 private:
@@ -34,8 +36,8 @@ private:
 
     // communication with datmo_node
     ros::Subscriber sub_person_position;
-    bool new_person_position, person_tracked;
-    geometry_msgs::Point person_position;
+    bool new_person_position, person_tracked, person_moving;
+    geometry_msgs::Point person_position, last_person;
 
     // communication with robot_moving_node
     ros::Subscriber sub_robot_moving;
@@ -99,6 +101,7 @@ public:
         origin_position.y = 0;
 
         person_tracked = false;
+        person_moving = false;
 
         // INFINITE LOOP TO COLLECT LASER DATA AND PROCESS THEM
         ros::Rate r(10); // this node will work at 10hz
@@ -186,6 +189,10 @@ update_variables()
             rotation_to_person = 0;
 
         person_tracked = person_position.x != 0 || person_position.y != 0;
+        person_moving = distancePoints(person_position, last_person) >= person_moving_epsilon;
+
+        last_person.x = person_position.x;
+        last_person.y = person_position.y;
     }
 
     if (new_localization)
@@ -226,7 +233,7 @@ void process_observing_the_person()
     // Processing of the state
     // Robair only observes and tracks the moving person
     // if the moving person does not move during a while (use frequency), we switch to the state "rotating_to_the_person"
-    if (new_person_position && person_position.z)
+    if (new_person_position && person_moving)
     {
         frequency = 0;
     }
@@ -251,7 +258,7 @@ void process_rotating_to_the_person()
     // Processing of the state
     // Robair rotates to be face to the moving person
     // if robair is face to the moving person and the moving person does not move during a while (use frequency), we switch to the state "moving_to_the_person"
-    if (person_position.z)
+    if (person_moving)
     {
         ROS_WARN("person_position: (%f, %f)", person_position.x, person_position.y);
         frequency = 0;
@@ -280,7 +287,7 @@ void process_moving_to_the_person()
     // Processing of the state
     // Robair moves to be close to the moving person
     // if robair is close to the moving person and the moving person does not move during a while (use frequency), we switch to the state "interacting_with_the_person"
-    if (person_position.z)
+    if (person_moving)
     {
         ROS_WARN("person_position: (%f, %f)", person_position.x, person_position.y);
         frequency = 0;
