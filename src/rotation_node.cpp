@@ -105,7 +105,7 @@ void init_rotation()
     // we compute the /translation_to_do
     translation_to_do = sqrt( ( goal_to_reach.x * goal_to_reach.x ) + ( goal_to_reach.y * goal_to_reach.y ) );
 
-    if ( translation_to_do )
+    if ( translation_to_do && goal_to_reach.z == 0)
     {
 
         //we compute the /rotation_to_do
@@ -123,8 +123,19 @@ void init_rotation()
         cond_rotation = true;
 
     }
-    else
+    else{
         ROS_WARN("translation_to_do is equal to 0");
+        rotation_to_do = goal_to_reach.z;
+
+        //we initialize the pid for the control of rotation
+        initial_orientation = current_orientation;
+        error_integral_rotation = 0;
+        error_previous_rotation = 0;
+
+        ROS_INFO("rotation_to_do: %f", rotation_to_do*180/M_PI);
+        cond_rotation = true;
+    }
+        
 
 }// init_rotation
 

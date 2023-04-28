@@ -28,6 +28,7 @@
 #define interaction_epsilon 1.5
 
 #define person_moving_epsilon 0.025
+#define float_comparison_precision 0.0000001
 
 class decision_node
 {
@@ -200,7 +201,7 @@ update_variables()
         // when we receive a new position(x, y, o) of robair in the map, we update:
         // local_base_position: the position of the base in the cartesian local frame of robot
         local_base_position.x = current_position.x - base_position.x;
-        local_base_position.x = current_position.x - base_position.x;
+        local_base_position.y = current_position.y - base_position.y;
         // translation_to_base: the translation that robair has to do to reach its base
         translation_to_base = distancePoints(current_position, base_position);
         // rotation_to_base: the rotation that robair has to do to reach its base
@@ -216,7 +217,7 @@ void process_waiting_for_a_person()
 
     // Processing of the state
     // as soon as we detect a moving person, we switch to the state "observing_the_person"
-    if (new_person_position)
+    if (new_person_position && person_tracked)
         current_state = observing_the_person;
 }
 
@@ -346,8 +347,10 @@ void process_rotating_to_the_base()
     if (new_localization)
     {
         ROS_WARN("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation * 180 / M_PI);
+        ROS_WARN("Local Base Position: (%lf, %lf, %lf)", local_base_position.x, local_base_position.y, local_base_position.z);
     }
 
+    local_base_position.z = rotation_to_base;
     pub_rotation_to_do.publish(local_base_position);
     if (rotation_to_base < rotation_epsilon)
         current_state = moving_to_the_base;
@@ -368,6 +371,7 @@ void process_moving_to_the_base()
     if (new_localization)
     {
         ROS_WARN("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation * 180 / M_PI);
+        ROS_WARN("Local Base Position: (%lf, %lf, %lf)", local_base_position.x, local_base_position.y, local_base_position.z);
     }
 
     pub_goal_to_reach.publish(local_base_position);
@@ -396,11 +400,10 @@ void process_resetting_orientation()
     else
         frequency++;
 
-    // TODO: remember rotation!
-    std_msgs::Float32 rotation_to_base_msg;
-    rotation_to_base_msg.data = rotation_to_base;
-    pub_rotation_to_do.publish(rotation_to_base_msg);
-    if (frequency >= frequency_expected && rotation_to_base < rotation_epsilon)
+    float difference = base_orientation - current_orientation;
+    local_base_position.z = difference;
+    pub_rotation_to_do.publish(local_base_position);
+    if (frequency >= frequency_expected && difference < rotation_epsilon)
         current_state = waiting_for_a_person;
 }
 
@@ -428,6 +431,8 @@ void robot_movingCallback(const std_msgs::Bool::ConstPtr &state)
 void localizationCallback(const geometry_msgs::Point::ConstPtr &l)
 {
     // process the localization received from my localization
+
+    if (abs(l->x) + abs(l->y) + abs(l->z) < float_comparison_precision) return;
 
     if (!init_localization)
     {

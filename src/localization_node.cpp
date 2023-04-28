@@ -115,12 +115,6 @@ localization_node() {
     ROS_INFO("Map: (%f, %f) -> (%f, %f) with size: %f",min.x, min.y, max.x, max.y, cell_size);
     ROS_INFO("wait for initial pose");
 
-    while(!init_position) {
-      ROS_WARN("Request for initial position failed; trying again...");
-      ros::Duration d(0.5);
-      d.sleep();
-    }
-
     //INFINTE LOOP TO COLLECT LASER DATA AND PROCESS THEM
     ros::Rate r(10);// this node will work at 10hz
     while (ros::ok()) {
@@ -159,10 +153,26 @@ void update() {
             predict_position();
             estimate_position();
         }
+        else{
+            float odom_diff_x = odom_current.x - odom_last.x;
+            float odom_diff_y = odom_current.y - odom_last.y;
+            float odom_diff_orient = odom_current_orientation - odom_last_orientation;
 
-        estimated_position.z = estimated_orientation;
-        pub_localization.publish(estimated_position);
+            odom_last = odom_current;
+            odom_last_orientation = odom_current_orientation;
+
+            estimated_position.x += odom_diff_x;
+            estimated_position.y += odom_diff_y;
+            estimated_orientation += odom_diff_orient;
+        }
+    } else {
+        estimated_position.x = 0;
+        estimated_position.y = 0;
+        estimated_position.z = 0;
     }
+
+    estimated_position.z = estimated_orientation;
+    pub_localization.publish(estimated_position);
 
 }// update
 
@@ -262,16 +272,17 @@ void estimate_position() {
         for (float loop_y = min_y; loop_y < max_y; loop_y += 0.05) {
             for (float loop_o = min_orientation; loop_o < max_orientation; loop_o += rad_in_5_deg) {
                 if (cell_value(loop_x, loop_y) == 0) { // robair can only be at a free cell
-		    int score_current = sensor_model(loop_x, loop_y, loop_o);
-		    if (score_current > max_score) {
-			ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, loop_o*180/M_PI, score_current);
-			populateMarkerTopic();
-		    	max_score = score_current;
-		    	estimated_position.x = loop_x;
-		    	estimated_position.y = loop_y;
-		    	estimated_orientation = loop_o;
-		    }
-		}
+                    int score_current = sensor_model(loop_x, loop_y, loop_o);
+                    if (score_current > max_score) {
+                        ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, loop_o*180/M_PI, score_current);
+                        populateMarkerTopic();
+                        max_score = score_current;
+                        estimated_position.x = loop_x;
+                        estimated_position.y = loop_y;
+                        estimated_orientation = loop_o;
+                    }
+		        
+                }
             }
         }
     }
@@ -411,7 +422,6 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr& o) {
 }//odomCallback
 
 void positionCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& p) {
-
     init_position = true;
     initial_position.x = p->pose.pose.position.x;
     initial_position.y = p->pose.pose.position.y;
