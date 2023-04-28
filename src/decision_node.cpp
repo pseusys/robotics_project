@@ -348,9 +348,7 @@ void process_rotating_to_the_base()
         ROS_WARN("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation * 180 / M_PI);
     }
 
-    std_msgs::Float32 rotation_to_base_msg;
-    rotation_to_base_msg.data = local_base_position;
-    pub_rotation_to_do.publish(rotation_to_base_msg);
+    pub_rotation_to_do.publish(local_base_position);
     if (rotation_to_base < rotation_epsilon)
         current_state = moving_to_the_base;
 }
@@ -372,7 +370,7 @@ void process_moving_to_the_base()
         ROS_WARN("position of robair in the map: (%f, %f, %f)", current_position.x, current_position.y, current_orientation * 180 / M_PI);
     }
 
-    pub_goal_to_reach.publish(base_position);
+    pub_goal_to_reach.publish(local_base_position);
     if (translation_to_base < translation_epsilon)
         current_state = resetting_orientation;
 }
