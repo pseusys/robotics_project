@@ -310,6 +310,7 @@ void process_interacting_with_the_person()
     {
         ROS_WARN("current_state: interacting_with_the_person");
         ROS_WARN("person_position: (%f, %f)", person_position.x, person_position.y);
+        frequency = 0;
     }
 
     // Processing of the state
@@ -320,7 +321,13 @@ void process_interacting_with_the_person()
         ROS_WARN("person_position: (%f, %f)", person_position.x, person_position.y);
     }
 
-    if (translation_to_person > interaction_epsilon || !person_tracked)
+    // To make the robot wait for a while. Safeguards the radar malfunctioning.
+    if (!person_tracked)
+        frequency++;
+    else 
+        frequency = 0;
+
+    if (translation_to_person > interaction_epsilon || (!person_tracked && frequency >= frequency_expected))
         current_state = rotating_to_the_base;
 }
 
