@@ -76,7 +76,7 @@ public:
         sub_person_position = n.subscribe("person_position", 1, &decision_node::person_positionCallback, this);
 
         // communication with rotation_node
-        pub_rotation_to_do = n.advertise<geometry_msgs::Point>("goal_to_rotate", 0);
+        pub_rotation_to_do = n.advertise<geometry_msgs::Point>("goal_to_rotate", 1);
 
         // communication with action_node
         pub_goal_to_reach = n.advertise<geometry_msgs::Point>("goal_to_reach", 1); // Preparing a topic to publish the position of the person
@@ -102,6 +102,7 @@ public:
 
         person_tracked = false;
         person_moving = false;
+        init_localization = false;
 
         // INFINITE LOOP TO COLLECT LASER DATA AND PROCESS THEM
         ros::Rate r(10); // this node will work at 10hz
@@ -119,8 +120,8 @@ public:
     void update()
     {
 
-        //if (init_localization)
-        //{
+        if (init_localization)
+        {
 
             update_variables();
 
@@ -166,8 +167,8 @@ public:
 
         state_has_changed = current_state != previous_state;
         previous_state = current_state;
-    //}
-    //else ROS_WARN("Initialize localization");
+    }
+    else ROS_WARN("Initialize localization");
 
 } // update
 
@@ -348,7 +349,7 @@ void process_rotating_to_the_base()
     }
 
     std_msgs::Float32 rotation_to_base_msg;
-    rotation_to_base_msg.data = rotation_to_person;
+    rotation_to_base_msg.data = local_base_position;
     pub_rotation_to_do.publish(rotation_to_base_msg);
     if (rotation_to_base < rotation_epsilon)
         current_state = moving_to_the_base;

@@ -72,6 +72,8 @@ private:
     geometry_msgs::Point estimated_position;
     float estimated_orientation;
 
+    ros::Publisher pub_localization;
+
     float distance_traveled;
     float previous_distance_traveled;
     float angle_traveled;
@@ -80,6 +82,7 @@ private:
 public:
 
 localization_node() {
+    pub_localization = n.advertise<geometry_msgs::Point>("localization", 1);
 
     sub_scan = n.subscribe("scan", 1, &localization_node::scanCallback, this);
     sub_odometry = n.subscribe("odom", 1, &localization_node::odomCallback, this);
@@ -111,7 +114,8 @@ localization_node() {
     ROS_INFO("map loaded");
     ROS_INFO("Map: (%f, %f) -> (%f, %f) with size: %f",min.x, min.y, max.x, max.y, cell_size);
     ROS_INFO("wait for initial pose");
-    // TODO: wait for initial position
+
+    getchar();
 
     //INFINTE LOOP TO COLLECT LASER DATA AND PROCESS THEM
     ros::Rate r(10);// this node will work at 10hz
@@ -151,6 +155,9 @@ void update() {
             predict_position();
             estimate_position();
         }
+
+        estimated_position.z = estimated_orientation;
+        pub_localization.publish(estimated_position);
     }
 
 }// update
