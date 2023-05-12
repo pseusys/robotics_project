@@ -3,6 +3,9 @@
 #include "geometry_msgs/Point.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "geometry_msgs/Quaternion.h"
+#include "visualization_msgs/Marker.h"
+#include "geometry_msgs/Point.h"
+#include "std_msgs/ColorRGBA.h"
 #include "nav_msgs/Odometry.h"
 #include "std_msgs/String.h"
 #include "std_msgs/Float32.h"
@@ -34,6 +37,7 @@ class decision_node
 {
 private:
     ros::NodeHandle n;
+    ros::Publisher pub_datmo_marker;
 
     // communication with datmo_node
     ros::Subscriber sub_person_position;
@@ -75,6 +79,8 @@ public:
 
         // communication with datmo_node
         sub_person_position = n.subscribe("person_position", 1, &decision_node::person_positionCallback, this);
+
+        pub_datmo_marker = n.advertise<visualization_msgs::Marker>("decision_marker", 1);
 
         // communication with rotation_node
         pub_rotation_to_do = n.advertise<geometry_msgs::Point>("goal_to_rotate", 1);
@@ -168,6 +174,10 @@ public:
 
         state_has_changed = current_state != previous_state;
         previous_state = current_state;
+
+        ROS_WARN("SELF POINT: %f, %f, %f", current_position.x, current_position.y, current_position.z);
+        ROS_WARN("BASE POINT: %f, %f, %f", local_base_position.x, local_base_position.y, local_base_position.z);
+        populateMarkerTopic();
     }
     else ROS_WARN("Initialize localization");
 
@@ -205,7 +215,7 @@ update_variables()
         // translation_to_base: the translation that robair has to do to reach its base
         translation_to_base = distancePoints(current_position, base_position);
         // rotation_to_base: the rotation that robair has to do to reach its base
-        rotation_to_base = current_orientation - base_orientation;
+        rotation_to_base = - current_orientation + base_orientation;
     }
 }
 
@@ -445,6 +455,45 @@ void localizationCallback(const geometry_msgs::Point::ConstPtr &l)
     current_position = *l;
     current_orientation = l->z;
 }
+
+void populateMarkerTopic()
+    {
+
+        visualization_msgs::Marker marker;
+
+        marker.header.frame_id = "laser";
+        marker.header.stamp = ros::Time::now();
+        marker.ns = "base_detector_tracker";
+        marker.id = 0;
+        marker.type = visualization_msgs::Marker::POINTS;
+        marker.action = visualization_msgs::Marker::ADD;
+
+        marker.pose.orientation.w = 1;
+
+        marker.scale.x = 0.1;
+        marker.scale.y = 0.1;
+
+        marker.color.a = 1.0;
+
+        // ROS_INFO("%i points to display", nb_pts);
+        geometry_msgs::Point p;
+        std_msgs::ColorRGBA c;
+
+        p.x = base_position.x;
+        p.y = base_position.y;
+        p.z = base_position.z;
+
+        c.r = 1;
+        c.g = 0;
+        c.b = 0;
+        c.a = 1;
+
+        // ROS_INFO("(%f, %f, %f) with rgba (%f, %f, %f, %f)", p.x, p.y, p.z, c.r, c.g, c.b, c.a);
+        marker.points.push_back(p);
+        marker.colors.push_back(c);
+
+        pub_datmo_marker.publish(marker);
+    }
 
 // Distance between two points
 float distancePoints(geometry_msgs::Point pa, geometry_msgs::Point pb)
